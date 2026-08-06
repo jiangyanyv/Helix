@@ -1,24 +1,65 @@
 from core.graph import graph
-from langchain_core.messages import HumanMessage
+from llm.client import LLMClient
+from core.session.manager import ConversationManager
 
-'''
-流式输出
-'''
 
 class Agent:
 
+
     def __init__(self):
+
         self.graph = graph
 
-    def chat(self, user_input: str):
-        state = {
-            "user_input": user_input,
+        self.session_manager = ConversationManager()
 
-            "messages": [
-                HumanMessage(content=user_input)
-            ]
-        }
+        self.llm = LLMClient()
 
-        result = self.graph.invoke(state)
 
-        return result["response"]
+
+    def stream_chat(
+            self,
+            session_id: str,
+            user_input: str
+    ):
+        # 保存用户输入
+
+        self.session_manager.add_user_message(
+            session_id,
+            user_input
+        )
+
+        messages = self.session_manager.get_messages(
+            session_id
+        )
+
+        # 运行Graph
+
+        result = self.graph.invoke(
+            {
+                "user_input": user_input,
+
+                "messages": messages
+            }
+        )
+
+        prompt = result["prompt"]
+
+        # print("+++++++++++")
+        # print(prompt)
+        # print("+++++++++++")
+
+        full_response = ""
+
+        # LLM流式输出
+
+        for token in self.llm.stream_chat(prompt):
+            full_response += token
+
+            yield token
+
+        # 保存完整回复
+
+        self.session_manager.add_ai_message(
+            session_id,
+            full_response
+        )

@@ -12,7 +12,6 @@ def prompt_node(state: AgentState):
 
 
     prompt = f"""
-
 {SYSTEM_PROMPT}
 
 
