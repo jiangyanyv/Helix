@@ -1,35 +1,40 @@
 from core.state import AgentState
 
-
-def memory_retriever_node(state: AgentState):
-
-    print("====== Memory Retriever ======")
+from services.context.context_builder import ContextBuilder
 
 
-    memory = {
-
-        "profile":[
-            "用户是一名软件工程师"
-        ],
+context_builder = ContextBuilder()
 
 
-        "personality":[
-            "用户喜欢先理解架构再编码"
-        ],
+def memory_retriever_node(
+        state: AgentState
+):
+    """
+    LangGraph Node
+
+    负责：
+    调用ContextBuilder
+
+    不负责：
+    Memory检索逻辑
+    """
+
+    print(
+        "====== Memory Retriever ======"
+    )
 
 
-        "preference":[
-            "用户喜欢详细技术解释"
-        ],
+    retrieved_memory = context_builder.build(
 
+        session_id=state["session_id"],
 
-        "recent_events":[
-            "用户正在开发陪伴式AI项目"
-        ]
+        query=state["user_input"]
 
-    }
+    )
 
 
     return {
-        "retrieved_memory": memory
+
+        "retrieved_memory": retrieved_memory
+
     }

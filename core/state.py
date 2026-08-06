@@ -1,31 +1,96 @@
-from typing import TypedDict, List
+from typing import TypedDict, List, Optional
+
 from langchain_core.messages import BaseMessage
 
+from memory.retrieved_memory import RetrievedMemory
 
-class AgentState(TypedDict):
+from memory.candidate import MemoryCandidate
+
+
+
+class AgentState(TypedDict, total=False):
     """
-    整个 Agent 的共享状态
+    LangGraph 全局状态
+
+    所有Node共享
+
     """
 
-    # ========= 用户 =========
+    # =====================
+    # Session
+    # =====================
+
+    session_id: str
+
+
+    # =====================
+    # User Input
+    # =====================
+
     user_input: str
 
-    # ========= 对话 =========
+
+    # =====================
+    # Perception
+    # =====================
+
+    # 语音识别后的文本
+
+    speech_text: str
+
+
+    # SenseVoice等模型输出
+
+    emotion: dict
+
+
+    # =====================
+    # Conversation
+    # =====================
+
     messages: List[BaseMessage]
 
-    # ========= Perception =========
-    intent: str
-    emotion: str
-    entities: List[str]
 
-    # ========= Memory =========
-    retrieved_memory: dict
+    # =====================
+    # Memory Context
+    # =====================
 
-    # ========= Planner =========
-    strategy: str
+    retrieved_memory: RetrievedMemory
 
-    # ========= Prompt =========
+
+    # =====================
+    # Planning
+    # =====================
+
+    plan: dict
+
+
+    # =====================
+    # Prompt
+    # =====================
+
     prompt: str
 
-    # ========= Response =========
+
+    # =====================
+    # LLM
+    # =====================
+
     response: str
+
+
+    # =====================
+    # Streaming
+    # =====================
+
+    response_chunks: List[str]
+
+
+    # =====================
+    # Memory Pipeline
+    # =====================
+
+    memory_candidates: List[MemoryCandidate]
+
+
+    accepted_memory: List[MemoryCandidate]

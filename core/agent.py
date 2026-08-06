@@ -1,4 +1,4 @@
-from core.graph import graph
+from core.conversation_graph import graph
 from llm.client import LLMClient
 from core.session.manager import ConversationManager
 
@@ -32,10 +32,15 @@ class Agent:
             session_id
         )
 
+        # print(messages)
+
+
         # 运行Graph
 
         result = self.graph.invoke(
             {
+                "session_id": session_id,
+
                 "user_input": user_input,
 
                 "messages": messages
