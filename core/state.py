@@ -1,33 +1,31 @@
-from typing import TypedDict
-from typing import List
-
+from typing import TypedDict, List
 from langchain_core.messages import BaseMessage
 
 
 class AgentState(TypedDict):
     """
-    整个LangGraph共享状态
+    整个 Agent 的共享状态
     """
 
-    # 当前用户输入
+    # ========= 用户 =========
     user_input: str
 
-    # 对话历史
+    # ========= 对话 =========
     messages: List[BaseMessage]
 
-    # Perception
+    # ========= Perception =========
     intent: str
     emotion: str
     entities: List[str]
 
-    # Memory
+    # ========= Memory =========
     memories: List[str]
 
-    # Planner
+    # ========= Planner =========
     strategy: str
 
-    # Prompt
+    # ========= Prompt =========
     prompt: str
 
-    # Response
+    # ========= Response =========
     response: str
