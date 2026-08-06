@@ -19,7 +19,7 @@ class AgentState(TypedDict):
     entities: List[str]
 
     # ========= Memory =========
-    memories: List[str]
+    retrieved_memory: dict
 
     # ========= Planner =========
     strategy: str
