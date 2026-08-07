@@ -1,53 +1,60 @@
-from services.llm.chat_request import (
-    ChatRequest
+from services.llm.stream_processor import (
+    StreamProcessor
 )
-
-from services.llm.client import (
-    LLMClient
-)
-
 
 
 class ResponseService:
 
-
     def __init__(
-            self,
-            llm_client: LLMClient
+
+        self,
+
+        llm_client
+
     ):
 
         self.llm = llm_client
 
+        self.processor = StreamProcessor()
 
 
     def stream(
-            self,
-            request: ChatRequest
+
+        self,
+
+        request
+
     ):
 
-        """
-        Agent回复流
+        token_stream = self.llm.stream(
 
-        """
-
-        yield from self.llm.stream(
             request
+
+        )
+
+        yield from self.processor.process(
+
+            token_stream
+
         )
 
 
-
     def generate(
-            self,
-            request: ChatRequest
+
+        self,
+
+        request
+
     ):
 
-        result = ""
+        chunks = []
 
         for chunk in self.stream(
+
                 request
+
         ):
 
-            result += chunk
+            chunks.append(chunk.text)
 
-
-        return result
+        return "".join(chunks)

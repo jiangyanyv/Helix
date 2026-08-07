@@ -16,8 +16,10 @@ from services.context.message_builder import (
 from services.memory.memory_manager import (
     MemoryManager
 )
-
-
+from services.event.event_bus import EventBus
+from voice.queue.audio_queue import (
+    AudioQueue
+)
 
 class ServiceContainer:
     """
@@ -67,6 +69,10 @@ class ServiceContainer:
             MessageBuilder()
         )
 
+
+        self.event_bus = EventBus()
+
+        self.audio_queue = AudioQueue()
 
 
 # 全局实例

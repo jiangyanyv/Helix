@@ -4,6 +4,7 @@ from langchain_core.messages import BaseMessage
 
 from services.llm.chat_request import ChatRequest
 from memory.retrieved_memory import RetrievedMemory
+from services.llm.stream_chunk import StreamChunk
 
 from memory.candidate import MemoryCandidate
 
@@ -74,7 +75,7 @@ class AgentState(TypedDict, total=False):
     response: str
 
     # LLM流式输出
-    response_chunks: list[str]
+    response_chunks: list[StreamChunk]
 
     # =====================
     # Memory Pipeline

@@ -1,5 +1,5 @@
 from core.agent import Agent
-
+from voice.tts.tts_worker import TTSWorker
 
 
 agent = Agent()
@@ -11,19 +11,16 @@ if __name__=="__main__":
 
     session_id="user001"
 
+    tts = TTSWorker()
+    tts.start()
 
     while True:
 
 
         text=input(
-            "用户:"
+            "输入:"
         )
 
-
-        # print(
-        #     "AI:",
-        #     end=""
-        # )
 
 
         for token in agent.stream_chat(

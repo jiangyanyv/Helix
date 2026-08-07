@@ -1,6 +1,7 @@
 from core.state import AgentState
 
 from services.container import container
+from services.event.event import EventType
 
 
 
@@ -22,23 +23,31 @@ def response_generator_node(
 
         }
 
-
-
     chunks = []
 
+    texts = []
 
-    for chunk in (
-        container.response_service
-        .stream(chat_request)
-    ):
+    for chunk in container.response_service.stream(chat_request):
+        container.event_bus.publish(
+
+            EventType.LLM_CHUNK,
+
+            chunk
+
+        )
 
         chunks.append(chunk)
 
+        texts.append(chunk.text)
+
+        container.audio_queue.put(
+            chunk
+        )
 
     return {
 
         "response_chunks": chunks,
 
-        "response": "".join(chunks)
+        "response": "".join(texts)
 
     }

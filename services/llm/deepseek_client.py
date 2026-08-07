@@ -1,13 +1,11 @@
 import time
 
-from numpy.distutils.fcompiler import none
 from openai import OpenAI
 
 from services.llm.client import LLMClient
 from services.llm.chat_request import ChatRequest
 from services.llm.chat_response import ChatResponse
 from config import Config
-
 
 class DeepSeekClient(
     LLMClient
@@ -54,40 +52,65 @@ class DeepSeekClient(
             total_tokens=usage.total_tokens if usage else 0,
         )
 
+
     def stream(
             self,
             request: ChatRequest
     ):
+
         kwargs = self._build_kwargs(request)
+
         kwargs["stream"] = True
 
-        first_token_time=None
-        token_count=0
-        a = time.time()
+        # 测试代码
+        first_token_time = None
+        token_count = 0
+        start = time.time()
 
 
-        response = self.client.chat.completions.create(**kwargs)
+        response = self.client.chat.completions.create(
+            **kwargs
+        )
+
         for chunk in response:
-            # 确保 choices 存在且不为空
-            if not chunk.choices or len(chunk.choices) == 0:
+
+            if not chunk.choices:
                 continue
-            # 确保 delta 存在且有 content
+
             delta = chunk.choices[0].delta
-            if delta and delta.content:
 
-                # 测试 记录首字时间
-                if first_token_time is None:
-                    first_token_time = time.time()
-                    ttft = first_token_time - a
-                    print(f"⚡ 首字耗时 (TTFT): {ttft:.3f}s")
-                token_count+=1
+            if not delta:
+                continue
 
+            content = delta.content
 
-                yield delta.content
-            # 如果 delta.content 为 None（流结束标记），直接跳过
-            
-        total_time = time.time() - a
-        print(f"⏱️ 流式响应完成 | 总耗时: {total_time:.3f}s | Token数: {token_count}")
+            if not content:
+                continue
+
+            if first_token_time is None:
+                first_token_time = time.time()
+                # logger.info(
+                #     f"⚡ 首Token耗时(TTFT): "
+                #     f"{first_token_time - start:.3f}s"
+                # )
+                print(
+                    f"⚡ 首Token耗时(TTFT): "
+                    f"{first_token_time - start:.3f}s"
+                )
+            token_count += 1
+
+            # 这里只负责Token
+            yield content
+
+        total = time.time() - start
+        # logger.info(
+        #     f"⏱️ 总耗时:{total:.3f}s "
+        #     f"| Token:{token_count}"
+        # )
+        print(
+            f"⏱️总耗时:{total:.3f}s "
+            f"| Token:{token_count}"
+        )
 
     ROLE_MAP = {
         "system": "system",
@@ -119,7 +142,7 @@ class DeepSeekClient(
             "temperature": request.temperature,
             "top_p": request.top_p,
         }
-        # print(kwargs)
+
         # 仅在 max_tokens 为有效正整数时传入
         if request.max_tokens and request.max_tokens > 0:
             kwargs["max_tokens"] = request.max_tokens
