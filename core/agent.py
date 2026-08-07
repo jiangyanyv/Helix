@@ -1,9 +1,25 @@
 from core.conversation_graph import graph
-from llm.client import LLMClient
 from core.session.manager import ConversationManager
 
 
 class Agent:
+    """
+    Agent入口
+
+    负责:
+
+    - session管理
+    - 调用LangGraph
+    - 返回结果
+
+
+    不负责:
+
+    - Prompt
+    - Memory
+    - LLM调用
+
+    """
 
 
     def __init__(self):
@@ -12,8 +28,6 @@ class Agent:
 
         self.session_manager = ConversationManager()
 
-        self.llm = LLMClient()
-
 
 
     def stream_chat(
@@ -21,50 +35,61 @@ class Agent:
             session_id: str,
             user_input: str
     ):
-        # 保存用户输入
+
+
+        # =====================
+        # 保存用户消息
+        # =====================
 
         self.session_manager.add_user_message(
             session_id,
             user_input
         )
 
-        messages = self.session_manager.get_messages(
-            session_id
+
+        # =====================
+        # 获取历史消息
+        # =====================
+
+        messages = (
+            self.session_manager
+            .get_messages(session_id)
         )
 
-        # print(messages)
 
-
+        # =====================
         # 运行Graph
+        # =====================
 
         result = self.graph.invoke(
             {
+
                 "session_id": session_id,
 
                 "user_input": user_input,
 
                 "messages": messages
+
             }
         )
 
-        prompt = result["prompt"]
 
-        # print("+++++++++++")
-        # print(prompt)
-        # print("+++++++++++")
+        # =====================
+        # 获取AI回复
+        # =====================
 
-        full_response = ""
+        response = result.get(
+            "response",
+            ""
+        )
 
-        # LLM流式输出
 
-        for token in self.llm.stream_chat(prompt):
-            full_response += token
-
-            yield token
-
-        # 保存完整回复
+        # 保存
 
         self.session_manager.add_ai_message(
             session_id,
-            full_response
+            response
         )
+
+
+        yield response

@@ -1,43 +1,74 @@
-from services.memory.profile_service import ProfileService
-from services.memory.preference_service import PreferenceService
-from services.memory.relationship_service import RelationshipService
-from services.memory.semantic_service import SemanticService
-from services.memory.episodic_service import EpisodicService
-from services.memory.emotion_service import EmotionService
+from services.llm.deepseek_client import (
+    DeepSeekClient
+)
+
+from services.response.response_service import (
+    ResponseService
+)
+
+from services.context.context_builder import (
+    ContextBuilder
+)
+
+from services.context.message_builder import (
+    MessageBuilder
+)
+from services.memory.memory_manager import (
+    MemoryManager
+)
 
 
 
 class ServiceContainer:
     """
-    全局Service容器
+    全局服务容器
 
-    管理：
-
-    Memory相关Service生命周期
-
-    保证：
-
-    全局单例
-
+    管理所有单例Service
     """
 
 
     def __init__(self):
 
-        self.profile_service = ProfileService()
+        # =====================
+        # Memory
+        # =====================
+        self.memory_manager = (
+            MemoryManager()
+        )
 
-        self.preference_service = PreferenceService()
+        # =====================
+        # LLM
+        # =====================
 
-        self.relationship_service = RelationshipService()
-
-        self.semantic_service = SemanticService()
-
-        self.episodic_service = EpisodicService()
-
-        self.emotion_service = EmotionService()
+        self.llm_client = DeepSeekClient()
 
 
+        # =====================
+        # Response
+        # =====================
 
-# 全局唯一实例
+        self.response_service = (
+            ResponseService(
+                self.llm_client
+            )
+        )
+
+
+        # =====================
+        # Context
+        # =====================
+
+        self.context_builder = (
+            ContextBuilder()
+        )
+
+
+        self.message_builder = (
+            MessageBuilder()
+        )
+
+
+
+# 全局实例
 
 container = ServiceContainer()

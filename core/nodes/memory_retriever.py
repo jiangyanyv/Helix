@@ -1,40 +1,46 @@
 from core.state import AgentState
 
-from services.context.context_builder import ContextBuilder
+from services.container import (
+    container
+)
 
-
-context_builder = ContextBuilder()
 
 
 def memory_retriever_node(
         state: AgentState
 ):
-    """
-    LangGraph Node
 
-    负责：
-    调用ContextBuilder
 
-    不负责：
-    Memory检索逻辑
-    """
-
-    print(
-        "====== Memory Retriever ======"
+    session_id = state.get(
+        "session_id",
+        ""
     )
 
 
-    retrieved_memory = context_builder.build(
+    user_input = state.get(
+        "user_input",
+        ""
+    )
 
-        session_id=state["session_id"],
 
-        query=state["user_input"]
+    retrieved_memory = (
+        container.memory_manager
+        .retrieve(
 
+            session_id,
+
+            user_input
+
+        )
     )
 
 
     return {
 
-        "retrieved_memory": retrieved_memory
+
+        "retrieved_memory":
+
+        retrieved_memory
+
 
     }

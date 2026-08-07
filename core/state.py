@@ -2,6 +2,7 @@ from typing import TypedDict, List, Optional
 
 from langchain_core.messages import BaseMessage
 
+from services.llm.chat_request import ChatRequest
 from memory.retrieved_memory import RetrievedMemory
 
 from memory.candidate import MemoryCandidate
@@ -22,27 +23,19 @@ class AgentState(TypedDict, total=False):
 
     session_id: str
 
-
     # =====================
     # User Input
     # =====================
 
     user_input: str
 
-
     # =====================
     # Perception
     # =====================
 
-    # 语音识别后的文本
-
     speech_text: str
 
-
-    # SenseVoice等模型输出
-
     emotion: dict
-
 
     # =====================
     # Conversation
@@ -50,13 +43,17 @@ class AgentState(TypedDict, total=False):
 
     messages: List[BaseMessage]
 
-
     # =====================
     # Memory Context
     # =====================
 
     retrieved_memory: RetrievedMemory
 
+    # =====================
+    # Context
+    # =====================
+
+    system_context: str
 
     # =====================
     # Planning
@@ -64,33 +61,25 @@ class AgentState(TypedDict, total=False):
 
     plan: dict
 
+    # =====================
+    # LLM Request
+    # =====================
+
+    chat_request: ChatRequest
 
     # =====================
-    # Prompt
-    # =====================
-
-    prompt: str
-
-
-    # =====================
-    # LLM
+    # Response
     # =====================
 
     response: str
 
-
-    # =====================
-    # Streaming
-    # =====================
-
-    response_chunks: List[str]
-
+    # LLM流式输出
+    response_chunks: list[str]
 
     # =====================
     # Memory Pipeline
     # =====================
 
     memory_candidates: List[MemoryCandidate]
-
 
     accepted_memory: List[MemoryCandidate]

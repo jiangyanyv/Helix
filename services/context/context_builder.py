@@ -1,82 +1,127 @@
+from core.prompts.system_prompt import SYSTEM_PROMPT
 from memory.retrieved_memory import RetrievedMemory
 
-from services.container import container
 
 
 class ContextBuilder:
     """
-    构建当前对话需要的上下文
+    构建LLM运行上下文
 
-    Conversation Graph
-            |
-            v
-      ContextBuilder
-            |
-            v
-      RetrievedMemory
+    输入:
+        RetrievedMemory
+
+    输出:
+        system_context
+
+    注意:
+        不负责查询Memory
+        不负责LLM
     """
 
-    def __init__(self):
-
-        self.profile_service = (
-            container.profile_service
-        )
-
-        self.preference_service = (
-            container.preference_service
-        )
-
-        self.relationship_service = (
-            container.relationship_service
-        )
-
-        self.semantic_service = (
-            container.semantic_service
-        )
-
-        self.episodic_service = (
-            container.episodic_service
-        )
-
-        self.emotion_service = (
-            container.emotion_service
-        )
 
 
     def build(
             self,
-            session_id: str,
-            query: str
-    ) -> RetrievedMemory:
-        """
-        根据当前用户和输入
-        构建Memory Context
-        """
+            retrieved_memory: RetrievedMemory | None
+    ) -> str:
 
-        return RetrievedMemory(
 
-            profile=self.profile_service.get(
-                session_id
-            ),
+        sections = []
 
-            preference=self.preference_service.get(
-                session_id
-            ),
 
-            relationship=self.relationship_service.get(
-                session_id
-            ),
+        # =====================
+        # Persona
+        # =====================
 
-            semantic=self.semantic_service.search(
-                query
-            ),
+        sections.append(
+            self.build_persona()
+        )
 
-            episodic=self.episodic_service.search(
-                query
-            ),
 
-            emotion=self.emotion_service.get_summary(
-                session_id
+        # =====================
+        # Memory
+        # =====================
+
+        if retrieved_memory:
+
+            memory_context = (
+                self.build_memory_context(
+                    retrieved_memory
+                )
             )
 
+            if memory_context:
+
+                sections.append(
+                    memory_context
+                )
+
+
+        return "\n\n".join(
+            sections
+        )
+
+
+
+    def build_persona(self) -> str:
+
+        return SYSTEM_PROMPT
+
+
+
+    def build_memory_context(
+            self,
+            memory: RetrievedMemory
+    ) -> str:
+
+
+        sections = []
+
+
+        if memory.profile:
+
+            sections.append(
+                f"""
+【用户基本信息】
+
+{memory.profile}
+""".strip()
+            )
+
+
+        if memory.preference:
+
+            sections.append(
+                f"""
+【用户偏好】
+
+{memory.preference}
+""".strip()
+            )
+
+
+        if memory.episodic:
+
+            sections.append(
+                f"""
+【近期事件】
+
+{memory.episodic}
+""".strip()
+            )
+
+
+        if memory.relationship:
+
+            sections.append(
+                f"""
+【关系信息】
+
+{memory.relationship}
+""".strip()
+            )
+
+
+        return "\n\n".join(
+            sections
         )

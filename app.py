@@ -20,10 +20,10 @@ if __name__=="__main__":
         )
 
 
-        print(
-            "AI:",
-            end=""
-        )
+        # print(
+        #     "AI:",
+        #     end=""
+        # )
 
 
         for token in agent.stream_chat(
