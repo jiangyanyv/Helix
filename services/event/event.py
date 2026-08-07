@@ -14,3 +14,18 @@ class EventType(str, Enum):
     USER_INTERRUPT = "user_interrupt"
 
     ASR_RESULT = "asr_result"
+
+    ASR_START = "asr_start"
+
+    ASR_FINISH = "asr_finish"
+
+    USER_SPEAKING = "user_speaking"
+
+    USER_STOP = "user_stop"
+
+    LLM_START = "llm_start"
+
+    LLM_FINISH = "llm_finish"
+
+
+    INTERRUPT = "runtime"

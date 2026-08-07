@@ -6,6 +6,7 @@ from services.llm.client import LLMClient
 from services.llm.chat_request import ChatRequest
 from services.llm.chat_response import ChatResponse
 from config import Config
+from logger import logger
 
 class DeepSeekClient(
     LLMClient
@@ -62,7 +63,9 @@ class DeepSeekClient(
 
         kwargs["stream"] = True
 
-        # 测试代码
+
+        '''llm端到端时间记录代码1'''
+        logger.info("开始调用llm...")
         first_token_time = None
         token_count = 0
         start = time.time()
@@ -87,30 +90,27 @@ class DeepSeekClient(
             if not content:
                 continue
 
+
+            '''llm端到端时间记录代码2'''
             if first_token_time is None:
                 first_token_time = time.time()
-                # logger.info(
-                #     f"⚡ 首Token耗时(TTFT): "
-                #     f"{first_token_time - start:.3f}s"
-                # )
-                print(
+                logger.info(
                     f"⚡ 首Token耗时(TTFT): "
                     f"{first_token_time - start:.3f}s"
                 )
             token_count += 1
 
+
             # 这里只负责Token
             yield content
 
+        '''llm端到端时间记录代码3'''
         total = time.time() - start
-        # logger.info(
-        #     f"⏱️ 总耗时:{total:.3f}s "
-        #     f"| Token:{token_count}"
-        # )
-        print(
-            f"⏱️总耗时:{total:.3f}s "
+        logger.info(
+            f"⏱️ 总耗时:{total:.3f}s "
             f"| Token:{token_count}"
         )
+
 
     ROLE_MAP = {
         "system": "system",

@@ -1,6 +1,10 @@
+from time import sleep
+
+from modelscope.server.models import output
+
 from core.agent import Agent
 from voice.tts.tts_worker import TTSWorker
-
+from utils.logger import logger
 
 agent = Agent()
 
@@ -22,17 +26,11 @@ if __name__=="__main__":
         )
 
 
-
         for token in agent.stream_chat(
             session_id,
             text
         ):
+            pass
 
-            print(
-                token,
-                end="",
-                flush=True
-            )
-
-
+        sleep(1)
         print()

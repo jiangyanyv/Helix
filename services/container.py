@@ -1,25 +1,12 @@
-from services.llm.deepseek_client import (
-    DeepSeekClient
-)
-
-from services.response.response_service import (
-    ResponseService
-)
-
-from services.context.context_builder import (
-    ContextBuilder
-)
-
-from services.context.message_builder import (
-    MessageBuilder
-)
-from services.memory.memory_manager import (
-    MemoryManager
-)
+from services.llm.deepseek_client import DeepSeekClient
+from services.response.response_service import ResponseService
+from services.context.context_builder import ContextBuilder
+from services.context.message_builder import MessageBuilder
+from services.memory.memory_manager import MemoryManager
 from services.event.event_bus import EventBus
-from voice.queue.audio_queue import (
-    AudioQueue
-)
+from voice.queue.audio_queue import AudioQueue
+from core.runtime.runtime_manager import RuntimeManager
+
 
 class ServiceContainer:
     """
@@ -73,6 +60,8 @@ class ServiceContainer:
         self.event_bus = EventBus()
 
         self.audio_queue = AudioQueue()
+
+        self.runtime_manager = RuntimeManager()
 
 
 # 全局实例
