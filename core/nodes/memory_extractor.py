@@ -18,9 +18,6 @@ def memory_extractor_node(
 
     """
 
-    print(
-        "====== Memory Extractor ======"
-    )
 
 
     candidates = extractor.extract(

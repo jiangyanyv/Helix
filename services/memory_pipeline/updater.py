@@ -1,5 +1,6 @@
 from typing import List
 
+from memory.candidate import MemoryCandidate
 from services.container import container
 
 

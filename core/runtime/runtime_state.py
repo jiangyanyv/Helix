@@ -9,6 +9,10 @@ class RuntimeState:
 
     session_id: str = ""
 
+    current_turn_id: str = ""
+
+    current_response_id: str = ""
+
     conversation_state: ConversationState = (
         ConversationState.IDLE
     )
@@ -24,7 +28,3 @@ class RuntimeState:
     user_speaking: bool = False
 
     interrupt_requested: bool = False
-
-    current_turn_id: str = ""
-
-    current_response_id: str = ""

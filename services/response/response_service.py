@@ -22,9 +22,20 @@ class ResponseService:
 
         self,
 
-        request
+        request,
+
+        turn_id: str | None = None,
 
     ):
+        """
+        流式生成回复。
+
+        Args:
+            request: ChatRequest 对象
+            turn_id: 当前对话轮次 ID，用于关联 TTS 与 Turn 生命周期。
+                     未传入时 Chunk.turn_id 为 None，
+                     但仍会正常生成文本。
+        """
 
         token_stream = self.llm.stream(
 
@@ -34,7 +45,9 @@ class ResponseService:
 
         yield from self.processor.process(
 
-            token_stream
+            token_stream,
+
+            turn_id=turn_id,
 
         )
 

@@ -19,9 +19,6 @@ def memory_judge_node(
         accepted_memory
     """
 
-    print(
-        "====== Memory Judge ======"
-    )
 
 
     accepted_memory = judge.judge(

@@ -1,5 +1,9 @@
-from core.conversation_graph import graph
+from core.conversation_graph import conversation_graph
+from core.memory_graph import memory_graph
 from core.session.manager import ConversationManager
+from services.container import container
+from services.llm.stream_chunk import StreamChunk
+from loguru import logger
 
 
 class Agent:
@@ -9,25 +13,30 @@ class Agent:
     负责:
 
     - session管理
-    - 调用LangGraph
-    - 返回结果
+    - 调用 Conversation Graph（生成回复）
+    - 调用 Memory Graph（写回记忆）
+    - Turn 生命周期管理
+    - 流式返回结果
 
 
     不负责:
 
     - Prompt
-    - Memory
-    - LLM调用
+    - Memory 查询/存储细节
+    - LLM 调用细节
 
     """
 
 
     def __init__(self):
 
-        self.graph = graph
+        self.conversation_graph = conversation_graph
+
+        self.memory_graph = memory_graph
 
         self.session_manager = ConversationManager()
 
+        self.runtime = container.runtime_manager
 
 
     def stream_chat(
@@ -35,10 +44,23 @@ class Agent:
             session_id: str,
             user_input: str
     ):
+        """
+        流式对话。
 
+        完整流程：
+            1. 保存用户消息
+            2. 启动新 Turn（产生 turn_id，TTS 依赖它判断有效性）
+            3. 运行 Conversation Graph：
+               memory_retriever → context_builder → message_builder → response_generator
+               （response_generator 内部会把 StreamChunk 逐个放入 audio_queue 给 TTS）
+            4. 流式 yield 回复文本给调用方
+            5. 保存 AI 消息
+            6. 运行 Memory Graph：extractor → judge → updater（把本轮对话沉淀为长期记忆）
+            7. 结束 Turn
+        """
 
         # =====================
-        # 保存用户消息
+        # 1. 保存用户消息
         # =====================
 
         self.session_manager.add_user_message(
@@ -48,7 +70,7 @@ class Agent:
 
 
         # =====================
-        # 获取历史消息
+        # 2. 获取历史消息
         # =====================
 
         messages = (
@@ -58,33 +80,54 @@ class Agent:
 
 
         # =====================
-        # 运行Graph
+        # 3. 启动 Turn
         # =====================
 
-        result = self.graph.invoke(
-            {
+        turn = self.runtime.start_turn(session_id)
+        turn_id = turn.turn_id
+        logger.info(f"Turn started | turn_id={turn_id}")
 
-                "session_id": session_id,
 
-                "user_input": user_input,
+        # =====================
+        # 4. 运行 Conversation Graph
+        # =====================
 
-                "messages": messages
+        try:
+            conv_result = self.conversation_graph.invoke(
+                {
+                    "session_id": session_id,
+                    "turn_id": turn_id,
+                    "user_input": user_input,
+                    "messages": messages
+                }
+            )
+        except Exception as e:
+            logger.exception(f"Conversation Graph 执行失败: {e}")
+            self.runtime.finish_turn(turn_id)
+            raise
 
-            }
+
+        # =====================
+        # 5. 流式 yield 回复文本
+        # =====================
+
+        response_chunks: list[StreamChunk] = conv_result.get(
+            "response_chunks",
+            []
         )
 
-
-        # =====================
-        # 获取AI回复
-        # =====================
-
-        response = result.get(
+        response = conv_result.get(
             "response",
             ""
         )
 
+        for chunk in response_chunks:
+            yield chunk.text
 
-        # 保存
+
+        # =====================
+        # 6. 保存 AI 回复
+        # =====================
 
         self.session_manager.add_ai_message(
             session_id,
@@ -92,4 +135,26 @@ class Agent:
         )
 
 
-        yield response
+        # =====================
+        # 7. 运行 Memory Graph（写回记忆，失败不影响主流程）
+        # =====================
+
+        try:
+            self.memory_graph.invoke(
+                {
+                    "session_id": session_id,
+                    "user_input": user_input,
+                    "response": response,
+                }
+            )
+            # logger.debug("Memory Graph 执行完成")
+        except Exception as e:
+            logger.exception(f"Memory Graph 执行失败（不影响主流程）: {e}")
+
+
+        # =====================
+        # 8. 结束 Turn
+        # =====================
+
+        self.runtime.finish_turn(turn_id)
+        logger.info(f"Turn finished | turn_id={turn_id}")

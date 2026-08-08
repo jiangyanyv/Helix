@@ -1,5 +1,4 @@
-from queue import Queue
-
+from queue import Queue, Empty
 from services.llm.stream_chunk import (
     StreamChunk
 )
@@ -15,6 +14,8 @@ class AudioQueue:
     def __init__(self):
 
         self.queue = Queue()
+
+        self._stop_flag = False
 
     def put(
             self,
@@ -32,9 +33,19 @@ class AudioQueue:
         return self.queue.empty()
 
     def clear(self):
-        """清空队列所有缓存数据"""
-        while not self.queue.empty():
-            self.queue.get_nowait()
+        """
+        清空当前所有待播放文本。
+        """
+
+        while True:
+
+            try:
+
+                self.queue.get_nowait()
+
+            except Empty:
+
+                break
 
     def stop(self):
         """标记队列停止，同时清空已有数据"""
