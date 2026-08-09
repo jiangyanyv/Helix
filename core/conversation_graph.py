@@ -8,22 +8,22 @@ from core.state import AgentState
 
 
 
-from core.nodes.memory_retriever import (
+from core.nodes.memory_retriever_node import (
     memory_retriever_node
 )
 
 
-from core.nodes.context_builder import (
+from core.nodes.context_builder_node import (
     context_builder_node
 )
 
 
-from core.nodes.message_builder import (
+from core.nodes.message_builder_node import (
     message_builder_node
 )
 
 
-from core.nodes.response_generator import (
+from core.nodes.response_generator_node import (
     response_generator_node
 )
 

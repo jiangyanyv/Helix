@@ -88,7 +88,7 @@ class RuntimeEventHandler:
     def on_interrupt(self, turn_id):
 
         print(
-            f"⚡ INTERRUPT | turn={turn_id}"
+            f"INTERRUPT | turn={turn_id}"
         )
 
         success = self.runtime.interrupt(

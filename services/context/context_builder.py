@@ -1,4 +1,4 @@
-from core.prompts.system_prompt import SYSTEM_PROMPT
+from context.system_prompt import SYSTEM_PROMPT
 from memory.retrieved_memory import RetrievedMemory
 
 

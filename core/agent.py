@@ -1,6 +1,6 @@
 from core.conversation_graph import conversation_graph
 from core.memory_graph import memory_graph
-from core.session.manager import ConversationManager
+from core.session.conversation_manager import ConversationManager
 from services.container import container
 from services.llm.stream_chunk import StreamChunk
 from loguru import logger

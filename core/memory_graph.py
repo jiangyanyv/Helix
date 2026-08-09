@@ -4,9 +4,9 @@ from langgraph.graph import END
 
 from core.state import AgentState
 
-from core.nodes.memory_extractor import memory_extractor_node
-from core.nodes.memory_judge import memory_judge_node
-from core.nodes.memory_updater import memory_updater_node
+from core.nodes.memory_extractor_node import memory_extractor_node
+from core.nodes.memory_judge_node import memory_judge_node
+from core.nodes.memory_updater_node import memory_updater_node
 
 builder = StateGraph(AgentState)
 

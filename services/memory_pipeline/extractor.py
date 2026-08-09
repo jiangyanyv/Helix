@@ -1,6 +1,6 @@
 from typing import List
 
-from memory.candidate import MemoryCandidate
+from memory.memory_candidate import MemoryCandidate
 
 
 
