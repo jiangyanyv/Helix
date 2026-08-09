@@ -44,7 +44,7 @@ class MemoryUpdater:
 
     def update(
             self,
-            session_id: str,
+            user_id: str,
             memories: List[MemoryCandidate]
     ):
         """
@@ -54,7 +54,7 @@ class MemoryUpdater:
         for memory in memories:
 
             self._save_memory(
-                session_id,
+                user_id,
                 memory
             )
 
@@ -62,7 +62,7 @@ class MemoryUpdater:
 
     def _save_memory(
             self,
-            session_id: str,
+            user_id: str,
             memory: MemoryCandidate
     ):
 
@@ -73,7 +73,7 @@ class MemoryUpdater:
 
             self.profile_service.update(
 
-                session_id,
+                user_id,
 
                 {
                     "content": memory.content
@@ -86,7 +86,7 @@ class MemoryUpdater:
 
             self.preference_service.update(
 
-                session_id,
+                user_id,
 
                 {
                     "content": memory.content,
@@ -100,7 +100,7 @@ class MemoryUpdater:
 
             self.relationship_service.update(
 
-                session_id,
+                user_id,
 
                 {
                     "content": memory.content
@@ -139,7 +139,7 @@ class MemoryUpdater:
 
             self.emotion_service.add(
 
-                session_id,
+                user_id,
 
                 {
                     "content": memory.content,

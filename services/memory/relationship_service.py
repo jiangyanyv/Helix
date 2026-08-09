@@ -11,34 +11,32 @@ class RelationshipService:
 
     def get(
             self,
-            session_id: str
+            user_id: str
     ) -> dict:
         """获取关系状态，无数据则返回默认模板"""
 
-        if session_id in self._storage:
-            return self._storage[session_id]
+        if user_id in self._storage:
+            return self._storage[user_id]
 
         return {
-            "relationship": "长期交流伙伴",
-            "trust_level": 0.5,
-            "familiarity": 0.3,
+
         }
 
     def update(
             self,
-            session_id: str,
+            user_id: str,
             relationship: dict
     ):
         """更新关系状态（增量合并）"""
 
-        if session_id not in self._storage:
-            self._storage[session_id] = {}
+        if user_id not in self._storage:
+            self._storage[user_id] = {}
 
-        self._storage[session_id].update(relationship)
+        self._storage[user_id].update(relationship)
 
     def clear(
             self,
-            session_id: str
+            user_id: str
     ):
-        if session_id in self._storage:
-            del self._storage[session_id]
+        if user_id in self._storage:
+            del self._storage[user_id]

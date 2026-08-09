@@ -27,27 +27,27 @@ class ConversationManager:
 
     def get_messages(
             self,
-            session_id: str
+            user_id: str
     ) -> List[BaseMessage]:
         """
         获取历史消息
         """
 
-        if session_id not in self.sessions:
-            self.sessions[session_id] = []
+        if user_id not in self.sessions:
+            self.sessions[user_id] = []
 
 
-        return self.sessions[session_id]
+        return self.sessions[user_id]
 
 
 
     def add_user_message(
             self,
-            session_id: str,
+            user_id: str,
             content: str
     ):
 
-        messages = self.get_messages(session_id)
+        messages = self.get_messages(user_id)
 
 
         messages.append(
@@ -60,11 +60,11 @@ class ConversationManager:
 
     def add_ai_message(
             self,
-            session_id: str,
+            user_id: str,
             content: str
     ):
 
-        messages = self.get_messages(session_id)
+        messages = self.get_messages(user_id)
 
 
         messages.append(
@@ -77,8 +77,8 @@ class ConversationManager:
 
     def clear(
             self,
-            session_id:str
+            user_id:str
     ):
 
-        if session_id in self.sessions:
-            del self.sessions[session_id]
+        if user_id in self.sessions:
+            del self.sessions[user_id]

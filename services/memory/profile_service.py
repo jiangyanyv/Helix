@@ -16,7 +16,7 @@ class ProfileService:
 
     def get_profile(
             self,
-            session_id: str
+            user_id: str
     ) -> dict:
         """
         获取用户画像。
@@ -24,8 +24,8 @@ class ProfileService:
         若尚未存储任何画像，则返回默认模板。
         """
 
-        if session_id in self._storage:
-            return self._storage[session_id]
+        if user_id in self._storage:
+            return self._storage[user_id]
 
         # 默认画像（首次访问时返回）
         return {
@@ -36,7 +36,7 @@ class ProfileService:
 
     def update(
             self,
-            session_id: str,
+            user_id: str,
             profile: dict
     ):
         """
@@ -45,17 +45,17 @@ class ProfileService:
         后续由 Memory Updater 调用。
         """
 
-        if session_id not in self._storage:
-            self._storage[session_id] = {}
+        if user_id not in self._storage:
+            self._storage[user_id] = {}
 
         # 增量合并，避免覆盖已有字段
-        self._storage[session_id].update(profile)
+        self._storage[user_id].update(profile)
 
     def clear(
             self,
-            session_id: str
+            user_id: str
     ):
         """清空指定用户的画像（调试/重置用）"""
 
-        if session_id in self._storage:
-            del self._storage[session_id]
+        if user_id in self._storage:
+            del self._storage[user_id]

@@ -28,14 +28,14 @@ class RuntimeManager:
 
     def start_turn(
             self,
-            session_id: str
+            user_id: str
     ):
 
         turn = self.turn_manager.start_turn(
-            session_id
+            user_id
         )
 
-        self.state.session_id = session_id
+        self.state.user_id = user_id
 
         self.state.current_turn_id = (
             turn.turn_id

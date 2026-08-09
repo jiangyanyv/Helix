@@ -11,8 +11,8 @@ def memory_retriever_node(
 ):
 
 
-    session_id = state.get(
-        "session_id",
+    user_id = state.get(
+        "user_id",
         ""
     )
 
@@ -27,7 +27,7 @@ def memory_retriever_node(
         container.memory_manager
         .retrieve(
 
-            session_id,
+            user_id,
 
             user_input
 

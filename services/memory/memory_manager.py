@@ -55,7 +55,7 @@ class MemoryManager:
 
     def retrieve(
             self,
-            session_id: str,
+            user_id: str,
             query: str
     ) -> RetrievedMemory:
 
@@ -64,26 +64,26 @@ class MemoryManager:
 
             profile=
             self.profile.get_profile(
-                session_id
+                user_id
             ),
 
 
             preference=
             self.preference.retrieve(
-                session_id
+                user_id
             ),
 
 
             episodic=
             self.episodic.search(
-                session_id,
+                user_id,
                 query
             ),
 
 
             relationship=
             self.relationship.get(
-                session_id
+                user_id
             ),
 
 

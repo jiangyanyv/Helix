@@ -22,7 +22,7 @@ class AgentState(TypedDict, total=False):
     # Session & Turn
     # =====================
 
-    session_id: str
+    user_id: str
 
     # 当前对话轮次ID（由 RuntimeManager.start_turn 创建）
     turn_id: str

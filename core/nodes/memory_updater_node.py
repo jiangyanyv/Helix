@@ -23,7 +23,7 @@ def memory_updater_node(
 
     updater.update(
 
-        session_id=state["session_id"],
+        user_id=state["user_id"],
 
         memories=state.get(
             "accepted_memory",

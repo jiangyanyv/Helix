@@ -34,7 +34,7 @@ def test_interruptible_tts():
     # =========================================================
 
     turn = runtime.start_turn(
-        session_id="interrupt_test"
+        user_id="interrupt_test"
     )
 
     turn_id = turn.turn_id
@@ -179,7 +179,7 @@ def test_non_interruptible_tts():
     # =========================================================
 
     turn = runtime.start_turn(
-        session_id="non_interruptible_test"
+        user_id="non_interruptible_test"
     )
 
     turn_id = turn.turn_id

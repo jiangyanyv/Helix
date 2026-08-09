@@ -59,7 +59,7 @@ def test_tts_pipeline_end_to_end():
         container.response_service, "llm", mock_llm
     ):
         agent = Agent()
-        session_id = "test_user_001"
+        user_id = "test_user_001"
 
         # =========================================================
         # 2. 发起一次 stream_chat，收集流式输出
@@ -68,7 +68,7 @@ def test_tts_pipeline_end_to_end():
         print("🤖 调用 Agent.stream_chat ...")
 
         streamed_tokens = []
-        for token in agent.stream_chat(session_id, "你好"):
+        for token in agent.stream_chat(user_id, "你好"):
             streamed_tokens.append(token)
             print(f"  ↳ yield: {token!r}")
 

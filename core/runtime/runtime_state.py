@@ -7,7 +7,7 @@ from core.runtime.conversation_state import ConversationState
 @dataclass(slots=True)
 class RuntimeState:
 
-    session_id: str = ""
+    user_id: str = ""
 
     current_turn_id: str = ""
 

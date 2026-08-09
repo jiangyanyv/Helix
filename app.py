@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     logger.info("系统启动开始")
 
-    session_id = "user001"
+    user_id = "user001"
 
     # =========================================================
     # 1. 使用 container 中的全局 RuntimeManager + TTSWorker
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
         tokens = []
         for token in agent.stream_chat(
-            session_id,
+            user_id,
             text
         ):
             pass

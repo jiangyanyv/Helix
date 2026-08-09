@@ -10,7 +10,7 @@ class Turn:
 
     turn_id: str
 
-    session_id: str
+    user_id: str
 
     # LLM 生成阶段是否仍在进行（finish/interrupt 后变为 False）
     active: bool = True
@@ -49,7 +49,7 @@ class TurnManager:
 
     def start_turn(
             self,
-            session_id: str
+            user_id: str
     ) -> Turn:
 
         # 如果之前存在 Turn
@@ -64,7 +64,7 @@ class TurnManager:
 
             turn_id=uuid4().hex,
 
-            session_id=session_id,
+            user_id=user_id,
 
             active=True,
 

@@ -41,7 +41,7 @@ class Agent:
 
     def stream_chat(
             self,
-            session_id: str,
+            user_id: str,
             user_input: str
     ):
         """
@@ -64,7 +64,7 @@ class Agent:
         # =====================
 
         self.session_manager.add_user_message(
-            session_id,
+            user_id,
             user_input
         )
 
@@ -75,7 +75,7 @@ class Agent:
 
         messages = (
             self.session_manager
-            .get_messages(session_id)
+            .get_messages(user_id)
         )
 
 
@@ -83,7 +83,7 @@ class Agent:
         # 3. 启动 Turn
         # =====================
 
-        turn = self.runtime.start_turn(session_id)
+        turn = self.runtime.start_turn(user_id)
         turn_id = turn.turn_id
         logger.info(f"Turn started | turn_id={turn_id}")
 
@@ -95,7 +95,7 @@ class Agent:
         try:
             conv_result = self.conversation_graph.invoke(
                 {
-                    "session_id": session_id,
+                    "user_id": user_id,
                     "turn_id": turn_id,
                     "user_input": user_input,
                     "messages": messages
@@ -130,7 +130,7 @@ class Agent:
         # =====================
 
         self.session_manager.add_ai_message(
-            session_id,
+            user_id,
             response
         )
 
@@ -142,7 +142,7 @@ class Agent:
         try:
             self.memory_graph.invoke(
                 {
-                    "session_id": session_id,
+                    "user_id": user_id,
                     "user_input": user_input,
                     "response": response,
                 }
