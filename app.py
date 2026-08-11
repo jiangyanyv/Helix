@@ -11,7 +11,7 @@ if __name__ == "__main__":
 
     logger.info("系统启动开始")
 
-    user_id = "user001"
+    user_id = "user_001"
 
     # =========================================================
     # 1. 使用 container 中的全局 RuntimeManager + TTSWorker
@@ -29,6 +29,10 @@ if __name__ == "__main__":
 
         sleep(0.5)
         text = input("输入: ")
+        # 输入判空处理
+        if not text or not text.strip():
+            logger.warning("输入为空，请重新输入")
+            continue
 
         # 清空 TTS 调试记录（可选）
         if hasattr(tts, "played_chunks"):

@@ -3,10 +3,10 @@ from typing import TypedDict, List
 from langchain_core.messages import BaseMessage
 
 from services.llm.chat_request import ChatRequest
-from memory.retrieved_memory import RetrievedMemory
+from services.memory.retrieved_memory import RetrievedMemory
 from services.llm.stream_chunk import StreamChunk
 
-from memory.memory_candidate import MemoryCandidate
+from services.memory.memory_candidate import MemoryCandidate
 
 
 

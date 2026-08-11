@@ -1,9 +1,5 @@
 from core.state import AgentState
-
-from services.memory_pipeline.judge import MemoryJudge
-
-
-judge = MemoryJudge()
+from services.container import container
 
 
 def memory_judge_node(
@@ -17,22 +13,14 @@ def memory_judge_node(
 
     输出:
         accepted_memory
+
+    使用 container 中的 MemoryJudge 单例
     """
 
-
-
-    accepted_memory = judge.judge(
-
-        state.get(
-            "memory_candidates",
-            []
-        )
-
+    accepted_memory = container.memory_judge.judge(
+        state.get("memory_candidates", [])
     )
 
-
     return {
-
         "accepted_memory": accepted_memory
-
     }

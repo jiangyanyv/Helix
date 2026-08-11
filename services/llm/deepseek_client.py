@@ -63,12 +63,12 @@ class DeepSeekClient(
 
         kwargs["stream"] = True
 
-        # logger.info(request)
+        logger.info(request)
         '''llm端到端时间记录代码1'''
-        logger.info("开始调用llm...")
-        first_token_time = None
-        token_count = 0
-        start = time.time()
+        # logger.info("开始调用llm...")
+        # first_token_time = None
+        # token_count = 0
+        # start = time.time()
 
 
         response = self.client.chat.completions.create(
@@ -92,24 +92,24 @@ class DeepSeekClient(
 
 
             '''llm端到端时间记录代码2'''
-            if first_token_time is None:
-                first_token_time = time.time()
-                logger.info(
-                    f"首Token耗时(TTFT): "
-                    f"{first_token_time - start:.3f}s"
-                )
-            token_count += 1
+            # if first_token_time is None:
+            #     first_token_time = time.time()
+            #     logger.info(
+            #         f"首Token耗时(TTFT): "
+            #         f"{first_token_time - start:.3f}s"
+            #     )
+            # token_count += 1
 
 
             # 这里只负责Token
             yield content
 
         '''llm端到端时间记录代码3'''
-        total = time.time() - start
-        logger.info(
-            f"总耗时:{total:.3f}s "
-            f"| Token:{token_count}"
-        )
+        # total = time.time() - start
+        # logger.info(
+        #     f"总耗时:{total:.3f}s "
+        #     f"| Token:{token_count}"
+        # )
 
 
     ROLE_MAP = {

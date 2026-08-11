@@ -1,11 +1,6 @@
 from core.state import AgentState
-
-from services.memory_pipeline.updater import MemoryUpdater
-
+from services.container import container
 from loguru import logger
-
-updater = MemoryUpdater()
-
 
 
 def memory_updater_node(
@@ -14,24 +9,15 @@ def memory_updater_node(
     """
     Memory Graph Node
 
-    调用Updater保存记忆
+    调用Updater保存记忆（使用 container 中的 MemoryUpdater 单例，已注入3个Memory Service）
 
     """
 
-
-
-
-    updater.update(
-
+    container.memory_updater.update(
         user_id=state["user_id"],
-
-        memories=state.get(
-            "accepted_memory",
-            []
-        )
-
+        memories=state.get("accepted_memory", [])
     )
 
-    logger.info("Fake记忆存储成功")
+    # logger.info("记忆写回完成")
 
     return {}
