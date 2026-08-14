@@ -4,14 +4,15 @@ from loguru import logger
 
 from services.llm.deepseek_client import DeepSeekClient
 from services.response.response_service import ResponseService
-from services.context.context_builder import ContextBuilder
-from services.context.message_builder import MessageBuilder
+from core.context.context_builder import ContextBuilder
+from core.context.message_builder import MessageBuilder
 from services.event.event_bus import EventBus
 from voice.queue.audio_queue import AudioQueue
 from core.runtime.runtime_manager import RuntimeManager
 from voice.tts.tts_worker import TTSWorker
 from core.runtime.event_handler import RuntimeEventHandler
 from core.session.conversation_manager import ConversationManager
+from core.session.summarizer import Summarizer
 
 # ===================== Memory: 3 个新 Service =====================
 from services.memory.profile_service import ProfileService
@@ -19,9 +20,9 @@ from services.memory.relationship_service import RelationshipService
 from services.memory.episodic_service import EpisodicService
 
 # ===================== Memory Pipeline =====================
-from services.memory_pipeline.memory_extractor import MemoryExtractor
-from services.memory_pipeline.memory_judge import MemoryJudge
-from services.memory_pipeline.memory_updater import MemoryUpdater
+from memory.memory_pipeline.memory_extractor import MemoryExtractor
+from memory.memory_pipeline.memory_judge import MemoryJudge
+from memory.memory_pipeline.memory_updater import MemoryUpdater
 
 # ===================== Embedding + Vector Store（可选，失败降级） =====================
 
@@ -122,9 +123,14 @@ class ServiceContainer:
         )
 
         # =====================
-        # Session / 对话历史（Redis 优先 + 内存降级 + 滑动窗口）
+        # Session / 对话历史（Redis + 滑动窗口 + 滚动摘要）
+        # Summarizer 注入 ConversationManager，触发摘要时调用 LLM
         # =====================
-        self.conversation_manager = ConversationManager()
+        self.summarizer = Summarizer()
+
+        self.conversation_manager = ConversationManager(
+            summarizer=self.summarizer,
+        )
 
         # =====================
         # LLM

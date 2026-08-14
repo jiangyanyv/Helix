@@ -27,11 +27,6 @@ def message_builder_node(
                     []
                 ),
 
-            # user_input=
-            #     state.get(
-            #         "user_input",
-            #         ""
-            #     )
         )
     )
 

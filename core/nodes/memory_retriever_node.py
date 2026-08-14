@@ -48,6 +48,8 @@ def memory_retriever_node(state: AgentState):
         svc = container.episodic_service
         if user_input and user_input.strip():
             episodic = svc.search(user_id, user_input, top_k=5) or []
+            for r in episodic:
+                logger.debug(f"id={r['id']}, score={r['_score']:.4f}, content={r['content'][:50]}...")
         else:
             episodic = svc.search_recent(user_id, top_k=5) or []
     except Exception as e:  # noqa: BLE001

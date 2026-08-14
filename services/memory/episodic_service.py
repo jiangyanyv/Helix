@@ -621,6 +621,10 @@ class EpisodicService:
             for row in rows
         ]
 
+        # ========== 添加默认分数 ==========
+        for event in result:
+            event["_score"] = 0.0  # 降级结果默认分数为 0
+
         self._query_cache[cache_key] = (
             self._copy_events(result)
         )
@@ -638,7 +642,7 @@ class EpisodicService:
         top_k: int = 5,
         score_threshold: Optional[
             float
-        ] = 0.3,
+        ] = Config.DEFAULT_SCORE_THRESHOLD,
     ) -> List[Dict[str, Any]]:
         """语义检索。
 

@@ -88,7 +88,7 @@ class Agent:
 
         turn = self.runtime.start_turn(user_id)
         turn_id = turn.turn_id
-        logger.info(f"Turn started | turn_id={turn_id}")
+        # logger.info(f"Turn started | turn_id={turn_id}")
 
 
         # =====================
@@ -151,11 +151,14 @@ class Agent:
         #       * LLM Client（OpenAI SDK）：线程安全
         # =====================
 
-        self._run_memory_graph_async(
-            user_id=user_id,
-            user_input=user_input,
-            response=response,
-        )
+        """
+        重构前暂时关闭
+        """
+        # self._run_memory_graph_async(
+        #     user_id=user_id,
+        #     user_input=user_input,
+        #     response=response,
+        # )
 
 
         # =====================

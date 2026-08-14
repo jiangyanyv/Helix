@@ -5,11 +5,11 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, List, Optional
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
-from services.context.system_prompt import SYSTEM_PROMPT
+from core.context.system_prompt import SYSTEM_PROMPT
 from services.memory.retrieved_memory import RetrievedMemory
 
 
@@ -89,7 +89,7 @@ class ContextBuilder:
         return (
             "【人设/回复风格】\n"
             "----------------\n"
-            f"{SYSTEM_PROMPT.strip()}"
+            f"{SYSTEM_PROMPT}"
         )
 
     def _build_memory_context(self, memory: RetrievedMemory) -> str:
@@ -105,7 +105,6 @@ class ContextBuilder:
                 f"{profile_text}"
             )
 
-        # 2) 重要人物关系
         # 2) 相关人物关系
         rels = memory.relationships or []
         if rels:
@@ -231,9 +230,10 @@ class ContextBuilder:
                 )
         if not blocks:
             return ""
-        return (
-            "【记忆上下文 Memory Context】\n"
-            "============================\n"
-            + "\n\n".join(blocks)
-            + "\n【记忆上下文结束】"
-        )
+        return "\n\n".join(blocks)
+        # return (
+        #     "【记忆上下文 Memory Context】\n"
+        #     "============================\n"
+        #     + "\n\n".join(blocks)
+        #     + "\n【记忆上下文结束】"
+        # )

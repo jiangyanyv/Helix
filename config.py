@@ -65,6 +65,7 @@ class Config:
 
     # 集合名称（目前仅 episodic 用向量检索）
     QDRANT_COLLECTION_EPISODIC = "episodic"
+    DEFAULT_SCORE_THRESHOLD = _get_float("DEFAULT_SCORE_THRESHOLD",0.8 )
 
     # ===================== Embedding API =====================
     EMBEDDING_PROVIDER = os.getenv("EMBEDDING_PROVIDER", "dashscope")
@@ -75,10 +76,11 @@ class Config:
     EMBEDDING_TIMEOUT = _get_int("EMBEDDING_TIMEOUT", 30)
 
     # ===================== 对话历史长度控制 =====================
-    MAX_HISTORY_TURNS = _get_int("MAX_HISTORY_TURNS", 20)
-    SUMMARY_TRIGGER_THRESHOLD = _get_int("SUMMARY_TRIGGER_THRESHOLD", 7)
-    SUMMARY_MAX_TOKENS = _get_int("SUMMARY_MAX_TOKENS", 500)
-    HISTORY_CACHE_TTL_SEC = _get_int("HISTORY_CACHE_TTL_SEC", 3600 * 24 * 7)
+    # MAX_HISTORY_TURNS = _get_int("MAX_HISTORY_TURNS", 4)
+    SUMMARY_TRIGGER_THRESHOLD = _get_int("SUMMARY_TRIGGER_THRESHOLD", 2)
+    MAX_HISTORY_TURNS = SUMMARY_TRIGGER_THRESHOLD * 2
+    SUMMARY_MAX_TOKENS = _get_int("SUMMARY_MAX_TOKENS", 1000)
+    HISTORY_CACHE_TTL_SEC = _get_int("HISTORY_CACHE_TTL_SEC", 3600 * 24 * 3)
 
     # ===================== 缓存策略（Memory Service用） =====================
     PROFILE_LRU_MAXSIZE = _get_int("PROFILE_LRU_MAXSIZE", 50)
