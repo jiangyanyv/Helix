@@ -20,9 +20,9 @@ from services.memory.relationship_service import RelationshipService
 from services.memory.episodic_service import EpisodicService
 
 # ===================== Memory Pipeline =====================
-from memory.memory_pipeline.memory_extractor import MemoryExtractor
-from memory.memory_pipeline.memory_judge import MemoryJudge
-from memory.memory_pipeline.memory_updater import MemoryUpdater
+from services.memory.memory_pipeline.memory_extractor import MemoryExtractor
+from services.memory.memory_pipeline.memory_judge import MemoryJudge
+from services.memory.memory_pipeline.memory_updater import MemoryUpdater
 
 # ===================== Embedding + Vector Store（可选，失败降级） =====================
 
@@ -172,6 +172,36 @@ class ServiceContainer:
         #   HELIX_SKIP_HEALTH_CHECK=true
         # =====================
         self._health_check()
+
+        # =====================
+        # 启动后台 Worker
+        #   - TTL 兜底扫描线程（记忆抽取兜底）
+        # =====================
+        self._start_background_workers()
+
+    # ==================================================
+    # 启动后台 Worker
+    # ==================================================
+
+    def _start_background_workers(self) -> None:
+        """在健康检查通过后启动所有后台线程。
+
+        所有线程均为 daemon=True：进程退出时自动结束。
+        """
+
+        # ---- TTL 兜底记忆抽取扫描器 ----
+        try:
+            from core.session.ttl_rescue import (
+                get_ttl_rescue_scanner,
+            )
+            scanner = get_ttl_rescue_scanner()
+            scanner.start()
+            self.ttl_rescue_scanner = scanner
+        except Exception as e:  # noqa: BLE001
+            logger.warning(
+                f"[Container] TTL 兜底扫描器启动失败（不影响主流程）: {e}"
+            )
+            self.ttl_rescue_scanner = None
 
     # ==================================================
     # 启动健康检查

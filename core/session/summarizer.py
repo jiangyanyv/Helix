@@ -84,22 +84,19 @@ class Summarizer:
 
         try:
 
-            for i, msg in enumerate(messages, 1):
-                # 直接打印对象，Python 会调用 __repr__ 或 __str__
-                logger.info(f"  #{i}: {msg}")
             # ====================================================
             # 打印待摘要的每条消息
             # ====================================================
-            logger.info(f"[Summarizer] 开始生成摘要，共 {len(messages)} 条消息:")
-            for i, msg in enumerate(messages, 1):
-                role = (
-                    "用户" if isinstance(msg, HumanMessage)
-                    else "AI" if isinstance(msg, AIMessage)
-                    else msg.__class__.__name__
-                )
-                content = msg.content if isinstance(msg.content, str) else str(msg.content)
-                # 截断过长内容，避免日志刷屏（可选）
-                logger.info(f"  #{i} [{role}]: {content[:200]}{'...' if len(content) > 200 else ''}")
+            # logger.info(f"[Summarizer] 开始生成摘要，共 {len(messages)} 条消息:")
+            # for i, msg in enumerate(messages, 1):
+            #     role = (
+            #         "用户" if isinstance(msg, HumanMessage)
+            #         else "AI" if isinstance(msg, AIMessage)
+            #         else msg.__class__.__name__
+            #     )
+            #     content = msg.content if isinstance(msg.content, str) else str(msg.content)
+            #     # 截断过长内容，避免日志刷屏（可选）
+            #     logger.info(f"  #{i} [{role}]: {content[:200]}{'...' if len(content) > 200 else ''}")
             # ====================================================
 
             prompt = self._build_prompt(

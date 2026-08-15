@@ -38,6 +38,7 @@
 from __future__ import annotations
 
 import json
+import threading
 import time
 from datetime import datetime
 from typing import List, Optional
@@ -660,12 +661,87 @@ class ConversationManager:
                 f"summary_len={len(new_summary)}"
             )
 
+            # 摘要成功后，复用同一批待摘要消息异步触发记忆抽取
+            # —— 记忆抽取改为跟随摘要触发，不再每轮对话都跑
+            self._trigger_memory_extraction(
+                user_id, to_summarize
+            )
+
         except Exception as e:  # noqa: BLE001
 
             # 摘要失败不影响消息保存
             logger.warning(
                 f"[ConvMgr] 摘要触发检查失败: {e}"
             )
+
+    # ========================================================
+    # Internal: 异步触发记忆抽取
+    # ========================================================
+
+    def _trigger_memory_extraction(
+        self,
+        user_id: str,
+        messages: List[BaseMessage],
+    ) -> None:
+        """摘要完成后异步触发 Memory Graph，复用同一批消息。
+
+        - 后台线程执行，不阻塞主流程
+        - daemon=True：进程退出时自动结束
+        - 内部捕获所有异常，仅记录日志，不影响会话
+
+        Memory Graph 输入：{user_id, messages}
+        extractor 一次吃完整批消息，judge 批量审评，
+        updater 逐条写库。
+        """
+
+        if not messages:
+            return
+
+        # 函数内 import 避免循环依赖：
+        #   core.memory_graph -> core.nodes -> services.container
+        #   -> core.session.conversation_manager
+        try:
+            from core.memory_graph import memory_graph
+        except Exception as e:  # noqa: BLE001
+            logger.warning(
+                f"[ConvMgr] 加载 memory_graph 失败，"
+                f"跳过记忆抽取: {e}"
+            )
+            return
+
+        def _task():
+            try:
+                memory_graph.invoke(
+                    {
+                        "user_id": user_id,
+                        "messages": messages,
+                    }
+                )
+                logger.info(
+                    f"[ConvMgr] 记忆抽取完成 | "
+                    f"user_id={user_id} | "
+                    f"msgs={len(messages)}"
+                )
+            except Exception as e:  # noqa: BLE001
+                logger.exception(
+                    f"[ConvMgr] 记忆抽取后台任务失败 | "
+                    f"user_id={user_id}, error={e}"
+                )
+
+        thread = threading.Thread(
+            target=_task,
+            daemon=True,
+            name=f"memory-extract-{user_id}",
+        )
+
+        thread.start()
+
+        logger.info(
+            f"[ConvMgr] 记忆抽取已调度后台执行 | "
+            f"user_id={user_id} | "
+            f"msgs={len(messages)} | "
+            f"thread={thread.name}"
+        )
 
     # ========================================================
     # Internal: 读取指定 seq 范围的消息

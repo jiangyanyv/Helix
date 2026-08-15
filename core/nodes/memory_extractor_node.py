@@ -10,23 +10,25 @@ def memory_extractor_node(state: AgentState):
     Memory Graph Node
 
     调用 MemoryExtractor：
-        用户消息 + AI 回复
+        多轮对话消息
             ↓
-        LLM 结构化抽取
+        LLM 结构化批量抽取
             ↓
         List[MemoryCandidate]
+
+    输入：state["messages"]（待抽取的多轮对话）
+    输出：memory_candidates
     """
 
-    user_text = state.get("user_input", "") or ""
-    ai_text = state.get("response", "") or ""
+    messages = state.get("messages", []) or []
 
-    candidates = container.memory_extractor.extract(
-        user_text=user_text,
-        ai_text=ai_text,
+    candidates = container.memory_extractor.extract_from_messages(
+        messages=messages,
     )
 
     logger.info(
         f"[memory_extractor_node] "
+        f"msgs={len(messages)} "
         f"抽取候选记忆数量={len(candidates)}"
     )
 
