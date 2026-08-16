@@ -41,6 +41,9 @@ class AgentState(TypedDict, total=False):
 
     emotion: dict
 
+    # AI 自身心情（预留，AI 心情系统使用）
+    ai_mood: str
+
     # =====================
     # Conversation
     # =====================
@@ -58,6 +61,19 @@ class AgentState(TypedDict, total=False):
     # =====================
 
     system_context: str
+
+    # =====================
+    # Tool Calling（状态B）
+    # =====================
+
+    # planner 判断是否需要工具
+    need_tool: bool
+
+    # 工具名称（如 "tavily_search"）
+    tool_name: str
+
+    # 工具执行结果（注入 context_builder）
+    tool_result: str
 
     # =====================
     # Planning

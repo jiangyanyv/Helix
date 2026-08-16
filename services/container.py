@@ -24,8 +24,7 @@ from services.memory.memory_pipeline.memory_extractor import MemoryExtractor
 from services.memory.memory_pipeline.memory_judge import MemoryJudge
 from services.memory.memory_pipeline.memory_updater import MemoryUpdater
 
-# ===================== Embedding + Vector Store（可选，失败降级） =====================
-
+from services.tool_calling.planner_builder import PlannerBuilder
 
 class ServiceContainer:
     """
@@ -142,6 +141,13 @@ class ServiceContainer:
         # =====================
         self.response_service = ResponseService(
             self.llm_client
+        )
+
+        # =====================
+        # Tool Calling（状态B）
+        # =====================
+        self.planner_builder = PlannerBuilder(
+            model_name=self.llm_client.model
         )
 
         # =====================

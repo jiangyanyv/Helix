@@ -77,7 +77,7 @@ class Config:
 
     # ===================== 对话历史长度控制 =====================
     # MAX_HISTORY_TURNS = _get_int("MAX_HISTORY_TURNS", 4)
-    SUMMARY_TRIGGER_THRESHOLD = _get_int("SUMMARY_TRIGGER_THRESHOLD", 2)
+    SUMMARY_TRIGGER_THRESHOLD = _get_int("SUMMARY_TRIGGER_THRESHOLD", 20)
     MAX_HISTORY_TURNS = SUMMARY_TRIGGER_THRESHOLD * 2
     SUMMARY_MAX_TOKENS = _get_int("SUMMARY_MAX_TOKENS", 1000)
     HISTORY_CACHE_TTL_SEC = _get_int("HISTORY_CACHE_TTL_SEC", 3600 * 24 * 3)
@@ -93,4 +93,14 @@ class Config:
 
     # ===================== 管理接口 =====================
     ADMIN_API_TOKEN = os.getenv("ADMIN_API_TOKEN")
+
+    # ===================== 工具调用（状态B） =====================
+    # False = 状态A（当前方案，不调用工具）
+    # True  = 状态B（planner 判断 + task_agent 工具调用 + 两阶段流式）
+    ENABLE_TOOL_CALLING = os.getenv(
+        "ENABLE_TOOL_CALLING", "false"
+    ).lower() == "true"
+
+    # 工具调用超时（秒）
+    TOOL_CALL_TIMEOUT_SEC = _get_int("TOOL_CALL_TIMEOUT_SEC", 60)
 

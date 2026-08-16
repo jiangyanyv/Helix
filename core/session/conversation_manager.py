@@ -409,12 +409,24 @@ class ConversationManager:
         self,
         user_id: str,
         content: str,
+        additional_kwargs: Optional[dict] = None,
     ) -> None:
-        """添加 AI 消息。"""
+        """添加 AI 消息。
+
+        Args:
+            additional_kwargs: 额外元数据（如 tool_result），
+                               存入 AIMessage 供程序逻辑读取。
+                               LLM 通过 content 感知内容，不读此字段。
+        """
+
+        msg = AIMessage(content=content)
+
+        if additional_kwargs:
+            msg.additional_kwargs = additional_kwargs
 
         self._append_one(
             user_id,
-            AIMessage(content=content),
+            msg,
         )
 
     # ========================================================

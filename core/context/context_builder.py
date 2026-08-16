@@ -37,7 +37,11 @@ def _format_dict_readable(data: Dict[str, Any], indent: int = 0) -> str:
 class ContextBuilder:
     """构建 LLM 运行上下文。输出 = Persona prompt + 记忆段。"""
 
-    def build(self, retrieved_memory: Optional[RetrievedMemory]) -> str:
+    def build(
+        self,
+        retrieved_memory: Optional[RetrievedMemory] = None,
+        tool_result: Optional[str] = None,
+    ) -> str:
         sections: List[str] = []
 
         # 1. 当前运行时上下文
@@ -46,7 +50,13 @@ class ContextBuilder:
         # 2. Persona
         sections.append(self._build_persona())
 
-        # 3. Memory
+        # 3. 工具结果（状态B：如果 planner 触发了工具调用）
+        if tool_result:
+            sections.append(
+                self._build_tool_context(tool_result)
+            )
+
+        # 4. Memory
         if retrieved_memory:
             memory_block = self._build_memory_context(retrieved_memory)
             if memory_block:
@@ -90,6 +100,19 @@ class ContextBuilder:
             "【人设/回复风格】\n"
             "----------------\n"
             f"{SYSTEM_PROMPT}"
+        )
+
+    def _build_tool_context(
+        self, tool_result: str
+    ) -> str:
+        """构建工具结果上下文段。"""
+
+        return (
+            "【联网搜索结果】\n"
+            "----------------\n"
+            f"{tool_result}\n"
+            "请基于以上搜索结果回答用户问题。"
+            "如果搜索结果不足以回答，请诚实告知。"
         )
 
     def _build_memory_context(self, memory: RetrievedMemory) -> str:
