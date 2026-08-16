@@ -24,9 +24,16 @@ from __future__ import annotations
 from loguru import logger
 import random
 
+from langchain_core.messages import SystemMessage
+
 from core.state import AgentState
 from services.container import container
 from services.llm.stream_chunk import StreamChunk
+
+
+# 喂给 Planner 的最近历史长度（条数）
+# 4 条 = 最近 2 轮（2 H + 2 A），足以覆盖"上轮提到工具 → 本轮省略追问"的场景
+PLANNER_RECENT_HISTORY_LIMIT = 4
 
 
 # ============================================================
@@ -64,9 +71,17 @@ def planner_node(state: AgentState):
     if not user_input or not user_input.strip():
         return {"need_tool": False, "tool_name": None}
 
+    # 从 state.messages 过滤出最近 N 条对话历史
+    # - 排除 SystemMessage（滚动摘要，对意图判断无价值且会污染 prompt）
+    # - 失败时降级为只看当前 user_input（保持原行为）
+    recent_history = _extract_recent_history(state)
+
     try:
         # Step1: 构建请求（Service 层纯逻辑）
-        request = container.planner_builder.build(user_input)
+        request = container.planner_builder.build(
+            user_input,
+            recent_history=recent_history,
+        )
 
         # Step2: 执行 LLM 调用
         response = container.llm_client.generate(request)
@@ -95,6 +110,42 @@ def planner_node(state: AgentState):
             f"[planner] LLM 判断失败，默认不调工具: {e}"
         )
         return {"need_tool": False, "tool_name": None}
+
+
+# ============================================================
+# Internal: 历史提取
+# ============================================================
+
+def _extract_recent_history(state: AgentState) -> list:
+    """从 state.messages 过滤出最近 N 条对话历史。
+
+    - 排除 SystemMessage（滚动摘要，对意图判断无价值且会污染 prompt）
+    - 取最近 PLANNER_RECENT_HISTORY_LIMIT 条
+    - 任何异常都降级为空列表（保持"只看当前 user_input"的原行为）
+
+    Returns:
+        List[BaseMessage]，可能为空
+    """
+
+    try:
+        messages = state.get("messages") or []
+        # 过滤掉 SystemMessage（主要是 ConversationManager 前置的摘要）
+        filtered = [
+            m for m in messages
+            if not isinstance(m, SystemMessage)
+        ]
+
+        # 取最近 N 条
+        if len(filtered) > PLANNER_RECENT_HISTORY_LIMIT:
+            filtered = filtered[-PLANNER_RECENT_HISTORY_LIMIT:]
+
+        return filtered
+
+    except Exception as e:  # noqa: BLE001
+        logger.debug(
+            f"[planner] 提取历史失败，降级为只看当前输入: {e}"
+        )
+        return []
 
 
 # ============================================================

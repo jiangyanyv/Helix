@@ -59,3 +59,14 @@ Thumbs.db
 # ===========================
 .coverage
 htmlcov/
+
+# ===========================
+# Model Weights（ModelScope / FunASR 等大模型权重，体积大不入库）
+# ===========================
+models/
+*.pt
+*.onnx
+*.bin
+*.safetensors
+# 注意：保留 checkpoints 目录（如果有 ML 训练 ckpt 需要提交，可单独 ! 取反）
+!checkpoints/

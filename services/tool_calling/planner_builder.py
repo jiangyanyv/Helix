@@ -41,6 +41,11 @@ PLANNER_SYSTEM_PROMPT = """你是一个意图判断器。判断用户输入是�
 - 闲聊、情绪倾诉、自我介绍、知识问答、意见建议
 - 用户在分享个人事情、经历、感受
 
+跨轮次意图识别：
+- 如果提供了上文对话，用户本轮消息可能省略主题（如"那上海呢"、"再来一个"、"还有呢"）
+- 此时应结合上文判断：上文在查实时信息且本轮是对同主题的追问/延续 → need_tool=true
+- 上文已在闲聊且本轮明显切换话题 → 按本轮内容判断
+
 只返回 JSON：{"need_tool": true} 或 {"need_tool": false}
 不要返回任何其他内容。"""
 
@@ -76,21 +81,32 @@ class PlannerBuilder:
     # 构建请求
     # ------------------------------------------------------
 
-    def build(self, user_input: str) -> ChatRequest:
+    def build(
+        self,
+        user_input: str,
+        recent_history: list | None = None,
+    ) -> ChatRequest:
         """根据用户输入构建 LLM 请求。
 
         Args:
             user_input: 用户原始输入文本
+            recent_history: 最近 N 轮对话消息（List[BaseMessage]）。
+                传入后 Planner 可结合上文判断省略句的意图，
+                None 时仅看当前这句（与原行为一致）。
 
         Returns:
             可直接传给 llm_client.generate() 的 ChatRequest
         """
 
+        messages = [SystemMessage(content=PLANNER_SYSTEM_PROMPT)]
+
+        if recent_history:
+            messages.extend(recent_history)
+
+        messages.append(HumanMessage(content=user_input))
+
         return ChatRequest(
-            messages=[
-                SystemMessage(content=PLANNER_SYSTEM_PROMPT),
-                HumanMessage(content=user_input),
-            ],
+            messages=messages,
             model=self._model_name,
             stream=False,
             temperature=0.0,
