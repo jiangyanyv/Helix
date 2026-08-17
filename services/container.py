@@ -1,6 +1,7 @@
 import os
 
 from loguru import logger
+from sympy import true
 
 from services.llm.deepseek_client import DeepSeekClient
 from services.response.response_service import ResponseService
@@ -168,6 +169,14 @@ class ServiceContainer:
         )
 
         # =====================
+        # 语音识别管线（麦克风 → Silero VAD → SenseVoice ASR）
+        # 重型依赖懒加载，模型在 pipeline._on_start 中预加载；
+        # 这里仅实例化轻量对象并接线（回声检查 / 语音打断）。
+        # 依赖缺失时降级为 None，不影响文本模式主流程。
+        # =====================
+        self._init_voice_pipeline()
+
+        # =====================
         # 启动健康检查（必选依赖：Redis / MySQL）
         #
         # Embedding / Qdrant 已在上方降级处理，不在此检查范围。
@@ -208,6 +217,97 @@ class ServiceContainer:
                 f"[Container] TTL 兜底扫描器启动失败（不影响主流程）: {e}"
             )
             self.ttl_rescue_scanner = None
+
+    # ==================================================
+    # 语音识别管线
+    # ==================================================
+
+    def _init_voice_pipeline(self) -> None:
+        """实例化语音识别管线单例并接线。
+
+        依赖（numpy/sounddevice/torch/silero_vad/funasr）缺失时降级为 None，
+        文本模式主流程不受影响。模型不在此时加载，推迟到 pipeline._on_start。
+        """
+        self.microphone = None
+        self.vad_service = None
+        self.sense_voice_asr = None
+        self.audio_capture_pipeline = None
+
+        try:
+            from config import Config
+            from voice.capture.microphone import Microphone
+            from voice.vad.silero_vad import SileroVAD
+            from voice.asr.sense_voice import SenseVoiceASR
+            from voice.pipeline.voice_pipeline import VoicePipeline
+
+            self.microphone = Microphone(
+                sample_rate=Config.MIC_SAMPLE_RATE,
+                channels=Config.MIC_CHANNELS,
+                block_size=Config.MIC_BLOCK_SIZE,
+                device=Config.MIC_DEVICE,
+            )
+            # VAD 采样率须与麦克风一致
+            self.vad_service = SileroVAD(
+                threshold=Config.VAD_THRESHOLD,
+                min_speech_ms=Config.VAD_MIN_SPEECH_MS,
+                max_speech_ms=Config.VAD_MAX_SPEECH_MS,
+                silence_ms=Config.VAD_SILENCE_MS,
+                sample_rate=Config.MIC_SAMPLE_RATE,
+                echo_release_ms=Config.VAD_ECHO_RELEASE_MS,
+                speech_start_frames=Config.VAD_SPEECH_START_FRAMES,
+                rms_threshold=Config.VAD_RMS_THRESHOLD,
+                hp_cutoff_hz=Config.VAD_HP_CUTOFF_HZ,
+            )
+            self.sense_voice_asr = SenseVoiceASR(
+                model_name=Config.ASR_MODEL,
+                device=Config.ASR_DEVICE,
+                language=Config.ASR_LANGUAGE,
+                sample_rate=Config.ASR_SAMPLE_RATE,
+            )
+            self.audio_capture_pipeline = VoicePipeline(
+                microphone=self.microphone,
+                vad=self.vad_service,
+                asr=self.sense_voice_asr,
+            )
+
+            # 回声检查：TTS 播放期间丢弃麦克风帧
+            self.audio_capture_pipeline.set_echo_check(
+                lambda: self.runtime_manager.state.tts_playing
+            )
+            # 语音开始：打断当前 Turn 的 TTS（停止当前 chunk + 标记 Turn 中断）
+            self.audio_capture_pipeline.set_on_speech_start(
+                self._on_user_speech_start
+            )
+
+            logger.info(
+                "[Container] 语音识别管线已就绪"
+                "（模型将在 pipeline 启动时预加载）"
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.warning(
+                f"[Container] 语音识别管线初始化失败"
+                f"（语音输入不可用，文本模式不受影响）: {e}"
+            )
+
+    def _on_user_speech_start(self) -> None:
+        """用户开始说话时打断当前 TTS 播放。
+
+        【临时开关】测试无打断行为时，把下面两行实际调用注释掉即可。
+        """
+        # ========== 打断开关：注释 = 禁用打断（风扇噪声下测试体验用） ==========
+        ENABLE_INTERRUPT = true
+        if not ENABLE_INTERRUPT:
+            return
+
+        try:
+            self.tts_worker.stop()
+        except Exception as e:  # noqa: BLE001
+            logger.debug(f"[Container] TTS stop 忽略异常: {e}")
+        try:
+            self.runtime_manager.interrupt()
+        except Exception as e:  # noqa: BLE001
+            logger.debug(f"[Container] runtime interrupt 忽略异常: {e}")
+        # ======================================================================
 
     # ==================================================
     # 启动健康检查

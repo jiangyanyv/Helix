@@ -96,11 +96,9 @@ class TTSWorker:
             # ==================================================
 
             '''测试功能暂停'''
-            # print(
-            #     f"🔊 TTS播放 | "
-            #     f"turn={chunk.turn_id} | "
-            #     f"text={chunk.text!r}"
-            # )
+            logger.info(
+                f"🔊 TTS播放 | turn={chunk.turn_id} | text={chunk.text!r}"
+            )
 
             # 测试已播放
             self.played_chunks.append(chunk)

@@ -104,3 +104,37 @@ class Config:
     # 工具调用超时（秒）
     TOOL_CALL_TIMEOUT_SEC = _get_int("TOOL_CALL_TIMEOUT_SEC", 60)
 
+    # ===================== 语音识别（麦克风 / VAD / ASR）=====================
+    # 麦克风
+    MIC_SAMPLE_RATE = _get_int("MIC_SAMPLE_RATE", 16000)
+    MIC_CHANNELS = _get_int("MIC_CHANNELS", 1)
+    MIC_BLOCK_SIZE = _get_int("MIC_BLOCK_SIZE", 512)  # 16kHz 下 512 ≈ 32ms
+    MIC_DEVICE = os.getenv("MIC_DEVICE")  # None = 系统默认输入设备
+
+    # VAD（Silero）
+    # threshold 0.6 偏严格，过滤风扇/键盘等环境噪声（概率多在 0.3~0.5）
+    # 阈值：噪声大就调高（0.7），安静环境可降到 0.5
+    VAD_THRESHOLD = _get_float("VAD_THRESHOLD", 0.6)
+    VAD_MIN_SPEECH_MS = _get_int("VAD_MIN_SPEECH_MS", 250)
+    VAD_MAX_SPEECH_MS = _get_int("VAD_MAX_SPEECH_MS", 30000)
+    VAD_SILENCE_MS = _get_int("VAD_SILENCE_MS", 600)
+    VAD_ECHO_RELEASE_MS = _get_int("VAD_ECHO_RELEASE_MS", 400)
+    # 语音开始确认帧数：需连续 N 帧超阈值才触发打断（512@16k 下 3 帧 ≈ 96ms）
+    # 调高更抗瞬态噪声，调低打断更灵敏
+    # 连续帧确认：抗噪核心参数
+    # 3 帧≈96ms（默认，平衡）；5 帧≈160ms（更抗噪，打断略迟）；1 帧=旧行为（最灵敏）
+    VAD_SPEECH_START_FRAMES = _get_int("VAD_SPEECH_START_FRAMES", 4)
+    # RMS 能量门控：帧能量低于此阈值直接跳过 VAD（抑制风扇/低音量背景）
+    # 0.003 ≈ 强风扇声；0.005 ≈ 严格（可能丢轻声说话）；0 即禁用
+    VAD_RMS_THRESHOLD = _get_float("VAD_RMS_THRESHOLD", 0.003)
+    # 单极高通截止频率（Hz）：压制风扇/空调低频轰鸣
+    # 150=温和（保留男声基频 80-180Hz），200=平衡，300=严格（切人声）；0 即禁用
+    VAD_HP_CUTOFF_HZ = _get_int("VAD_HP_CUTOFF_HZ", 150)
+
+    # ASR（SenseVoice / FunASR）
+    # MODELSCOPE_CACHE 由 .env 注入（funasr 库内部读取），必须为纯 ASCII 路径
+    ASR_MODEL = os.getenv("ASR_MODEL", "iic/SenseVoiceSmall")
+    ASR_DEVICE = os.getenv("ASR_DEVICE", "cuda") #auto/cpu/cuda
+    ASR_LANGUAGE = os.getenv("ASR_LANGUAGE", "auto")
+    ASR_SAMPLE_RATE = _get_int("ASR_SAMPLE_RATE", 16000)
+

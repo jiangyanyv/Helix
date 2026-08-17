@@ -28,3 +28,23 @@ httpx>=0.27.0
 # 测试
 pytest>=8.0.0
 pytest-asyncio>=0.23.0
+
+# ============ 新增：语音识别模块 ============
+# 麦克风采集
+sounddevice>=0.4.6
+
+# VAD（Silero）
+silero-vad>=5.1
+
+# ASR（FunASR + SenseVoice）
+funasr>=1.1.0
+numpy>=1.24.0
+
+# ★transformers 必须锁定 4.51.3（5.x 与 SenseVoice/CosyVoice 不兼容，
+#   会导致 KV cache 损坏、语种误判）
+transformers==4.51.3
+
+# PyTorch（CUDA 12.1）—— 需通过专用 index 安装：
+#   pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu121
+torch>=2.1.0
+torchaudio>=2.1.0
