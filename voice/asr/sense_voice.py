@@ -15,6 +15,7 @@ from typing import Optional
 import numpy as np
 from loguru import logger
 
+from voice.asr.hotwords import apply_hotwords, load_hotwords
 from voice.models import EmotionTag, Language, VoiceInput
 
 # SenseVoice 输出标签正则：形如 <|zh|>
@@ -56,7 +57,13 @@ class SenseVoiceASR:
         device: str = "cuda",
         language: str = "auto",
         sample_rate: int = 16000,
+        hotwords=None,
     ):
+        """
+        hotwords:
+            None  —— 每次 transcribe 调用 load_hotwords() 取最新配置（支持 env/文件热更新）
+            list  —— 固定使用调用方传入的 (错词, 标准词) 列表，绕过配置加载（独立测试场景）
+        """
         self.model_name = model_name
         self.language = language
         self.sample_rate = sample_rate
@@ -65,6 +72,21 @@ class SenseVoiceASR:
         self.device = self._resolve_device(device)
 
         self._model = None
+
+        # 热词修正：None = 每次调用时动态加载；list = 固定候选
+        self._hotwords_override = hotwords
+        if hotwords is not None:
+            logger.info(
+                f"[SenseVoiceASR] 热词修正已启用（固定列表）| "
+                f"items={len(hotwords)}"
+            )
+        else:
+            # 预热一次，记录生效配置便于排障
+            items = load_hotwords()
+            logger.info(
+                f"[SenseVoiceASR] 热词修正已启用（动态配置）| "
+                f"items={len(items)}"
+            )
 
     # ==================================================
     # 设备解析（带 CUDA 可用性回退）
@@ -256,6 +278,15 @@ class SenseVoiceASR:
         # BGM 事件不计为有效文本
         text = "" if parsed["event"] == "BGM" else parsed["text"]
         text_stripped = text.strip()
+
+        # 热词修正：把同音误识别词替换回正确词（如「爱丽西啊」→「爱莉希雅」）
+        if text_stripped:
+            items = (
+                self._hotwords_override
+                if self._hotwords_override is not None
+                else load_hotwords()
+            )
+            text_stripped = apply_hotwords(text_stripped, items)
 
         confidence = 0.95 if text_stripped else 0.0
         duration = len(audio) / float(self.sample_rate)

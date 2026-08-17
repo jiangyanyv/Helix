@@ -117,13 +117,13 @@ class Config:
     VAD_THRESHOLD = _get_float("VAD_THRESHOLD", 0.6)
     VAD_MIN_SPEECH_MS = _get_int("VAD_MIN_SPEECH_MS", 250)
     VAD_MAX_SPEECH_MS = _get_int("VAD_MAX_SPEECH_MS", 30000)
-    VAD_SILENCE_MS = _get_int("VAD_SILENCE_MS", 600)
+    VAD_SILENCE_MS = _get_int("VAD_SILENCE_MS", 800)
     VAD_ECHO_RELEASE_MS = _get_int("VAD_ECHO_RELEASE_MS", 400)
     # 语音开始确认帧数：需连续 N 帧超阈值才触发打断（512@16k 下 3 帧 ≈ 96ms）
     # 调高更抗瞬态噪声，调低打断更灵敏
     # 连续帧确认：抗噪核心参数
     # 3 帧≈96ms（默认，平衡）；5 帧≈160ms（更抗噪，打断略迟）；1 帧=旧行为（最灵敏）
-    VAD_SPEECH_START_FRAMES = _get_int("VAD_SPEECH_START_FRAMES", 4)
+    VAD_SPEECH_START_FRAMES = _get_int("VAD_SPEECH_START_FRAMES", 3)
     # RMS 能量门控：帧能量低于此阈值直接跳过 VAD（抑制风扇/低音量背景）
     # 0.003 ≈ 强风扇声；0.005 ≈ 严格（可能丢轻声说话）；0 即禁用
     VAD_RMS_THRESHOLD = _get_float("VAD_RMS_THRESHOLD", 0.003)

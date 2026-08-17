@@ -295,7 +295,7 @@ class ServiceContainer:
         【临时开关】测试无打断行为时，把下面两行实际调用注释掉即可。
         """
         # ========== 打断开关：注释 = 禁用打断（风扇噪声下测试体验用） ==========
-        ENABLE_INTERRUPT = true
+        ENABLE_INTERRUPT = False
         if not ENABLE_INTERRUPT:
             return
 
